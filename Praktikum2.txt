@@ -14,7 +14,78 @@ dann runterladen(F8)
 -> mit FIOSET Strom auf den Port geben 		(=1)
 -> mit FIOCLR Strom auf den Port abstellen 	(=1)
 
-====Aufgabe 4)==========================
+=====Aufgabe 4)=========================
 
 -> Achtung, LEDs 4 und 5 gehen nur auf LOW an!
 
+=====code===============================
+
+#include "LPC17xx.h"
+
+#define LED2 20
+#define LED3 21
+#define SPEAKER 5
+#define LED4 8
+#define LED5 9
+
+void delay(int ms)
+{
+	int y = 0;
+	int z = 0;
+	while (z < ms)
+	{
+		z++;
+		y=0;
+		while (y<20000)
+		{
+			y++;
+		}
+	}
+}
+
+void testBedLedBlink(int led)
+{
+	delay(200);
+	LPC_GPIO0->FIOCLR |= 1<<led;
+	delay(200);
+	LPC_GPIO0->FIOSET |= 1<<led;
+}
+
+int main()
+{
+
+	//Initialisierungen
+	LPC_GPIO1->FIODIR |= 1<<LED2;
+	LPC_GPIO1->FIODIR |= 1<<LED3;
+	LPC_GPIO0->FIODIR |= 1<<LED4;
+	LPC_GPIO0->FIODIR |= 1<<LED5;
+	LPC_GPIO2->FIODIR |= 1<<SPEAKER;
+
+	while(1)
+	{
+		/* 	Aufgabe 1
+		LPC_GPIO0->FIOSET |= 1<<LED4;
+		delay(100);
+		LPC_GPIO0->FIOCLR |= 1<<LED4;
+		delay(100);
+		/**/
+		/*	Aufgabe 2
+		LPC_GPIO1->FIOCLR |= 1<<LED3;
+		LPC_GPIO1->FIOSET |= 1<<LED2;
+		delay(4000);
+		LPC_GPIO1->FIOCLR |= 1<<LED2;
+		LPC_GPIO1->FIOSET |= 1<<LED3;
+		delay(4000);
+		/**/
+		/* 	Aufgabe 3
+		LPC_GPIO2->FIOSET |= 1<<SPEAKER;
+		delay(1);
+		LPC_GPIO2->FIOCLR |= 1<<SPEAKER;
+		delay(1);
+		/**/
+		/*	Aufgabe 4
+		testBedLedBlink(LED4);
+		testBedLedBlink(LED5);
+		/**/
+	}
+}
