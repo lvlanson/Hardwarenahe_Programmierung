@@ -1,4 +1,11 @@
-Aufgabe 2)
+mikrocontroller.net für weitere Infos (Schaltpläne lesen)
+
+=====Umgang mit der Software(KEIL)======
+
+erst übersetzen(F7),
+dann runterladen(F8)
+
+=====Aufgabe 2)=========================
 
 -> in der PDF von chip1768 den Schaltplan aufschlagen und in die GPIOs sehen. In GPIO(1) finden sich die LEDs. 
    Dort sind die Ports mit P[x] dargestellt, wobei x das Bit für den jeweiligen Port darstellt.
@@ -6,3 +13,5 @@ Aufgabe 2)
 -> mit FIODIR die Ports auf Eingang setzen (LPC_GPIO1->FIODIR |= 1<<LEDx)
 -> mit FIOSET Strom auf den Port geben 		(=1)
 -> mit FIOCLR Strom auf den Port abstellen 	(=1)
+
+Aufgabe 3)
