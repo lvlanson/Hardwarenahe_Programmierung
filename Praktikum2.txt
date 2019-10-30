@@ -14,4 +14,7 @@ dann runterladen(F8)
 -> mit FIOSET Strom auf den Port geben 		(=1)
 -> mit FIOCLR Strom auf den Port abstellen 	(=1)
 
-Aufgabe 3)
+====Aufgabe 4)==========================
+
+-> Achtung, LEDs 4 und 5 gehen nur auf LOW an!
+
