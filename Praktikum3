@@ -1,0 +1,8 @@
+==========TASTENDRÜCKEN============
+->	Button abrufen
+	-> 	if(LPC_GPIO0->FIOPIN & (1<<BT1) == 0)
+	-> 	BT1 = auf die Binärstelle des Button 1 gestellt
+	->	Wenn FIOPIN an der Stelle BT1 "gedrückt" ist, dann ist dort "Null" gesetzt
+	-> 	Wenn FIOPIN an der Stelle BT1 "nicht gedrückt" ist, dann ist dort "Eins" gesetzt
+	->	Bei der Und-Verknüpfung sollte an der Stelle von BT1 der Wert herauskommen
+		der signalisiert ob der Button gedrückt ist 	
