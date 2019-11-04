@@ -6,3 +6,92 @@
 	-> 	Wenn FIOPIN an der Stelle BT1 "nicht gedrückt" ist, dann ist dort "Eins" gesetzt
 	->	Bei der Und-Verknüpfung sollte an der Stelle von BT1 der Wert herauskommen
 		der signalisiert ob der Button gedrückt ist 	
+
+
+========CODE=======================
+
+#include "LPC17xx.h"                          
+#include <stdbool.h>
+//Definitionszuweisungen------------------
+#define LED1 18   //P1.18 LPC Modul high-aktiv
+#define LED2 20   //P1.20 LPC Modul high-aktiv
+#define LED3 21   //P1.21 LPC Modul high-aktiv
+#define LED4 23   //P1.23 LPC Modul high-aktiv
+#define BT1 6     //Button 1 an P0.6
+#define BT2 16    //Button 2 an P0.16
+#define SPK 5     //Speaker P2.5
+#define LED4_BD 9   //LED4 mBed low-aktiv
+#define LED5_BD 8   //LED5 mBed low-aktiv
+//Funktionsdeklarationen------------------
+int warte();
+int outLED();   //Ausgabe Zählvariable auf LED Zeile LPC Modul 
+
+// Variablenzuweisungen-------------------
+// globale variable
+int izaehl=0;   //Zählvariable
+//***Mainprogramm*******************************
+int main()
+{
+ //Initialisierungen ---------------------
+ LPC_GPIO1->FIODIR|=(1<<LED1);      //LED1 1-4 LPC Modul auf Portausgang
+ LPC_GPIO1->FIODIR|=(1<<LED2);
+ LPC_GPIO1->FIODIR|=(1<<LED3);
+ LPC_GPIO1->FIODIR|=(1<<LED4);
+ LPC_GPIO2->FIODIR|= 1<<SPK;
+ 
+ bool toggle = 0;
+ 
+ while(1)
+ {
+  /*
+  if((LPC_GPIO0->FIOPIN & (1<<BT1)) == 0)
+  {
+   warte(50);
+   if(toggle)
+    toggle = 0;
+   else
+    toggle = 1;
+   while((LPC_GPIO0->FIOPIN & (1<<BT1)) == 0);
+  }
+  if(toggle)
+  {
+   // Aufgabe 2
+   LPC_GPIO1->FIOSET |= 1<<LED1;
+   warte(500);
+   LPC_GPIO1->FIOCLR |= 1<<LED1;
+   warte(500);
+   
+   // Aufgabe 3
+   LPC_GPIO2->FIOSET |= 1<<SPK;
+   warte(1);
+   LPC_GPIO2->FIOCLR |= 1<<SPK;
+   warte(1);
+  }
+  */
+  if((LPC_GPIO0->FIOPIN & (1<<BT1)) == 0)
+   LPC_GPIO1->FIOSET |= 1<<LED1;
+  if((LPC_GPIO0->FIOPIN & (1<<BT2)) == 0)
+   LPC_GPIO1->FIOSET |= 1<<LED4;
+  warte(500);
+  LPC_GPIO1->FIOCLR |= 1<<LED1;
+  LPC_GPIO1->FIOCLR |= 1<<LED4;
+  warte(500);
+ } 
+}
+ 
+//***Funktionen********************************* 
+//Zeitschleife in Millisekunden
+//-------------------------------
+int warte(int izahl)   //izahl in Millisekunden
+{
+ int iz=0,iy=0;
+ while (iz<izahl)
+      {
+      iz++;
+      iy=0; 
+      while (iy<20000)
+            { 
+         iy++;
+            }    
+      } // ende while
+}
