@@ -32,20 +32,21 @@ PCLKSELx gibt den Teiler für die PCLK an (	00	-> /1.
 
 1)	Timer initialisieren
 	-> Timer 0 einschalten
-		->LPC_SC->PCONP |=1<<1
+		->	LPC_SC->PCONP |=1<<1
 	-> Clock-Teiler einstellen
-		->LPC_SC->PCLKSEL0 |=0b11<<2
+		->	LPC_SC->PCLKSEL0 |=3<<2
 	-> Matchregister einstellen
 		-> cpu takt = 100mhz
 		-> 100mhz / 8 = 12,5
 		-> MR = 12,5Mhz/2*1hz
 		-> MR = 6250000
 
-		-> LPC_TIM0->MR0 = 6250000
+		-> 	LPC_TIM0->MR0 = 6250000
 	-> Einstellen was das Matchregister tun soll
 		-> Interrupt soll ausgelöst werden
 
-		-> LPC_TIM0->MCR |= 0b011<<0
+		-> 	LPC_TIM0->MCR |= 3<<0
+
 2)	Interrupt Service Routine Schreiben
 	-> z.B. void TIMER0_IRQHandler()
 	-> name ist vorgegeben und muss zwingend verwendet werden
@@ -58,15 +59,20 @@ PCLKSELx gibt den Teiler für die PCLK an (	00	-> /1.
 		-> sonst bleibt der Interrupt bestehen und man würde nie
 		   die ISR verlassen
 
-		-> LPC_TIM0->IR |=1<<0
+		-> 	LPC_TIM0->IR |=1<<0
 			-> 1 Setzen um zu resetten			
 			-> Interrupt Register um Bit-Positionen zu finden
 	-> Nutzfunktion implementieren
 
-	
+3)	Interrupt Service Routine Priorität setzen
+	-> NVIC_SetPriority(TIMER0_IRQn,15)	
+4)	Interrupt Service Routine aktivieren (sonst würde nie die 
+									Funktion abgefeuert werden)
+	-> NVIC_EnableIRQ(TIMER0_IRQn)
 
+5)	Timer aktivieren
 
-
+	->	LPC_TIM0->TCR |=1<<0
 
 
 
