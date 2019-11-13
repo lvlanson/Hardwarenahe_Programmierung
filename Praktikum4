@@ -1,0 +1,93 @@
+==============TIMER EINSTELLEN===============
+
+->	Timer zählt kontinuierlich hoch (max. 2³²)
+->	Es wird ein "Match-Register" gesetzt, dass festsetzt bis wie 
+	weit der Timer zählt
+-> 	Wenn der Timer mit dem Match-Register matched, wird ein 
+	Ereignis ausgelöst (z.B. ein Interrupt, Timer zurücksetzen 
+	Anhalten) -> Match-Control Register (MRxI/MRxR/MRxS 
+	x - Matchregister Nummer #)
+
+	-> Der Timer fängt daraufhin wieder von vorne an zu zählen
+
+-> 	die Hälfte der Frequenz gibt an, wie lange der Timer braucht 
+	um einmal bis zum Maximum hochzulaufen (Speed)
+
+Formeln (siehe PR_DOKU Seite 19)
+
+
+->	PCLK gibt für jeden Takt der CPU einen Impuls
+	->	PCLK modifiziert werden (jede 2./4./8.)
+-> 	Jeder Timer hat eigene 4 Matchregister
+-> 	Es gibt 4 Timer
+
+PCLKSELx gibt den Teiler für die PCLK an (	00	-> /1.
+											01	-> /2.
+											10	-> /4. (Standard)
+											11	-> /8.
+										 )
+
+
+==============ABLAUF==========================
+
+1)	Timer initialisieren
+	-> Timer 0 einschalten
+		->LPC_SC->PCONP |=1<<1
+	-> Clock-Teiler einstellen
+		->LPC_SC->PCLKSEL0 |=0b11<<2
+	-> Matchregister einstellen
+		-> cpu takt = 100mhz
+		-> 100mhz / 8 = 12,5
+		-> MR = 12,5Mhz/2*1hz
+		-> MR = 6250000
+
+		-> LPC_TIM0->MR0 = 6250000
+	-> Einstellen was das Matchregister tun soll
+		-> Interrupt soll ausgelöst werden
+
+		-> LPC_TIM0->MCR |= 0b011<<0
+2)	Interrupt Service Routine Schreiben
+	-> z.B. void TIMER0_IRQHandler()
+	-> name ist vorgegeben und muss zwingend verwendet werden
+	-> system_LPC17xx.s definiert die Namen der ISR-Funktionen
+	   (External Interrupts)
+		-> enthält die IVT (Interrupt Vektor Table)
+		-> Timer 0 meldet IMMER an Port 17
+		-> Ist über system_LPC17xx.s nachvollziehbar
+	-> !!!Interrupt Flags zurücksetzen!!!
+		-> sonst bleibt der Interrupt bestehen und man würde nie
+		   die ISR verlassen
+
+		-> LPC_TIM0->IR |=1<<0
+			-> 1 Setzen um zu resetten			
+			-> Interrupt Register um Bit-Positionen zu finden
+	-> Nutzfunktion implementieren
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
