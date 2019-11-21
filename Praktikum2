@@ -82,7 +82,7 @@ int main()
 		delay(4000);
 		/**/
 		/* 	Aufgabe 3
-		LPC_GPIO2->FIOSET |= 1<<SPEAKER;
+		LPC_GPIO2->FIOSET |= 1<<;
 		delay(1);
 		LPC_GPIO2->FIOCLR |= 1<<SPEAKER;
 		delay(1);
