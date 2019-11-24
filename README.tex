@@ -1,0 +1,301 @@
+# Hardwarenahe_Programmierung
+\documentclass[11pt,a4paper,draft]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{minted}
+\author{Ansgar Dabow}
+\begin{document}
+\tableofcontents
+\newpage
+
+\section{Praktikum}
+mikrocontroller.net für weitere Infos (Schaltpläne lesen)
+
+\subsection{Umgang mit der Software(KEIL)}
+
+erst übersetzen(F7),
+dann runterladen(F8)
+
+\subsection{Aufgabe 2}
+\begin{list}{•}{}
+\item in der PDF von chip1768 den Schaltplan aufschlagen und in die GPIOs sehen. In GPIO(1) finden sich die LEDs. Dort sind die Ports mit $P[x]$ dargestellt, wobei x das Bit für den jeweiligen Port darstellt.
+\item Über \#DEFINE die LEDx mit der zugehörigen Bitkonstanten verkoppeln 
+\end{list}
+
+\begin{list}{•}{}
+\item mit FIODIR die Ports auf Eingang setzen \\ $(LPC_GPIO1->FIODIR |= 1<<LEDx)$
+\item mit FIOSET Strom auf den Port geben 		(=1)
+\item mit FIOCLR Strom auf den Port abstellen 	(=1)
+\item FIOPIN gibt den Status der LED an, somit kann auch direkt auf die LED zugegriffen werden
+\end{list}
+
+\subsection{Aufgabe 4}
+\begin{list}{•}{}
+\item Achtung, LEDs 4 und 5 gehen nur auf LOW an!
+\end{list}
+
+\subsection{code}
+\begin{minted}{c}
+#include "LPC17xx.h"
+
+#define LED2 20
+#define LED3 21
+#define SPEAKER 5
+#define LED4 8
+#define LED5 9
+
+void delay(int ms)
+{
+	int y = 0;
+	int z = 0;
+	while (z < ms)
+	{
+		z++;
+		y=0;
+		while (y<20000)
+		{
+			y++;
+		}
+	}
+}
+
+void testBedLedBlink(int led)
+{
+	delay(200);
+	LPC_GPIO0->FIOCLR |= 1<<led;
+	delay(200);
+	LPC_GPIO0->FIOSET |= 1<<led;
+}
+
+int main()
+{
+
+	//Initialisierungen
+	LPC_GPIO1->FIODIR |= 1<<LED2;
+	LPC_GPIO1->FIODIR |= 1<<LED3;
+	LPC_GPIO0->FIODIR |= 1<<LED4;
+	LPC_GPIO0->FIODIR |= 1<<LED5;
+	LPC_GPIO2->FIODIR |= 1<<SPEAKER;
+
+	while(1)
+	{
+		/* 	Aufgabe 1
+		LPC_GPIO0->FIOSET |= 1<<LED4;
+		delay(100);
+		LPC_GPIO0->FIOCLR |= 1<<LED4;
+		delay(100);
+		/**/
+		/*	Aufgabe 2
+		LPC_GPIO1->FIOCLR |= 1<<LED3;
+		LPC_GPIO1->FIOSET |= 1<<LED2;
+		delay(4000);
+		LPC_GPIO1->FIOCLR |= 1<<LED2;
+		LPC_GPIO1->FIOSET |= 1<<LED3;
+		delay(4000);
+		/**/
+		/* 	Aufgabe 3
+		LPC_GPIO2->FIOSET |= 1<<SPEAKER;
+		delay(1);
+		LPC_GPIO2->FIOCLR |= 1<<SPEAKER;
+		delay(1);
+		/**/
+		/*	Aufgabe 4
+		testBedLedBlink(LED4);
+		testBedLedBlink(LED5);
+		/**/
+	}
+}
+\end{minted}
+\section{Praktikum}
+\subsection{TASTENDRÜCKEN}
+\begin{list}{•}{Button abrufen}
+\item $if(LPC\_GPIO0->FIOPIN \& (1<<BT1) == 0)$
+\item BT1 = auf die Binärstelle des Button 1 gestellt
+\item Wenn FIOPIN an der Stelle BT1 "gedrückt" ist, dann ist dort "Null" gesetzt
+\item Wenn FIOPIN an der Stelle BT1 "nicht gedrückt" ist, dann ist dort "Eins" gesetzt
+\item Bei der Und-Verknüpfung sollte an der Stelle von BT1 der Wert herauskommen der signalisiert ob der Button gedrückt ist
+\end{list} 	
+
+\subsection{CODE}
+\begin{minted}{c}
+#include "LPC17xx.h"                          
+#include <stdbool.h>
+//Definitionszuweisungen------------------
+#define LED1 18   //P1.18 LPC Modul high-aktiv
+#define LED2 20   //P1.20 LPC Modul high-aktiv
+#define LED3 21   //P1.21 LPC Modul high-aktiv
+#define LED4 23   //P1.23 LPC Modul high-aktiv
+#define BT1 6     //Button 1 an P0.6
+#define BT2 16    //Button 2 an P0.16
+#define SPK 5     //Speaker P2.5
+#define LED4_BD 9   //LED4 mBed low-aktiv
+#define LED5_BD 8   //LED5 mBed low-aktiv
+//Funktionsdeklarationen------------------
+int warte();
+int outLED();   //Ausgabe Zählvariable auf LED Zeile LPC Modul 
+
+// Variablenzuweisungen-------------------
+// globale variable
+int izaehl=0;   //Zählvariable
+//***Mainprogramm*******************************
+int main()
+{
+ //Initialisierungen ---------------------
+ LPC_GPIO1->FIODIR|=(1<<LED1);      //LED1 1-4 LPC Modul auf Portausgang
+ LPC_GPIO1->FIODIR|=(1<<LED2);
+ LPC_GPIO1->FIODIR|=(1<<LED3);
+ LPC_GPIO1->FIODIR|=(1<<LED4);
+ LPC_GPIO2->FIODIR|= 1<<SPK;
+ 
+ bool toggle = 0;
+ 
+ while(1)
+ {
+  /*
+  if((LPC_GPIO0->FIOPIN & (1<<BT1)) == 0)
+  {
+   warte(50);
+   if(toggle)
+    toggle = 0;
+   else
+    toggle = 1;
+   while((LPC_GPIO0->FIOPIN & (1<<BT1)) == 0);
+  }
+  if(toggle)
+  {
+   // Aufgabe 2
+   LPC_GPIO1->FIOSET |= 1<<LED1;
+   warte(500);
+   LPC_GPIO1->FIOCLR |= 1<<LED1;
+   warte(500);
+   
+   // Aufgabe 3
+   LPC_GPIO2->FIOSET |= 1<<SPK;
+   warte(1);
+   LPC_GPIO2->FIOCLR |= 1<<SPK;
+   warte(1);
+  }
+  */
+  if((LPC_GPIO0->FIOPIN & (1<<BT1)) == 0)
+   LPC_GPIO1->FIOSET |= 1<<LED1;
+  if((LPC_GPIO0->FIOPIN & (1<<BT2)) == 0)
+   LPC_GPIO1->FIOSET |= 1<<LED4;
+  warte(500);
+  LPC_GPIO1->FIOCLR |= 1<<LED1;
+  LPC_GPIO1->FIOCLR |= 1<<LED4;
+  warte(500);
+ } 
+}
+ 
+//***Funktionen********************************* 
+//Zeitschleife in Millisekunden
+//-------------------------------
+int warte(int izahl)   //izahl in Millisekunden
+{
+ int iz=0,iy=0;
+ while (iz<izahl)
+      {
+      iz++;
+      iy=0; 
+      while (iy<20000)
+            { 
+         iy++;
+            }    
+      } // ende while
+}
+\end{minted}
+\section{Praktikum}
+\subsection{TIMER EINSTELLEN}
+\begin{list}{•}{}
+\item Timer zählt kontinuierlich hoch (max. 2³²)
+\item Es wird ein "Match-Register" gesetzt, dass festsetzt bis wie weit der Timer zählt
+\item Wenn der Timer mit dem Match-Register matched, wird ein Ereignis ausgelöst (z.B. ein Interrupt, Timer zurücksetzen Anhalten) -> Match-Control Register (MRxI/MRxR/MRxS x - Matchregister Nummer \#)
+\item Der Timer fängt daraufhin wieder von vorne an zu zählen
+
+\item die Hälfte der Frequenz gibt an, wie lange der Timer braucht um einmal bis zum Maximum hochzulaufen (Speed)
+
+\item Formeln (siehe PR\_DOKU Seite 19)
+\item PCLK gibt für jeden Takt der CPU einen Impuls
+\begin{enumerate}
+\item PCLK modifiziert werden (jede 2./4./8.)
+\end{enumerate}
+\item Jeder Timer hat eigene 4 Matchregister
+\item Es gibt 4 Timer
+
+\item PCLKSELx gibt den Teiler für die PCLK an\\
+\begin{tabular}{c | c}
+00	& /1.\\
+01	& /2.\\
+10	& /4. (Standard)\\
+11	& /8.
+\end{tabular}										 )
+\end{list}
+
+\subsection{ABLAUF}
+\begin{enumerate}
+\item Timer initialisieren
+\begin{itemize}
+\item Timer 0 einschalten
+\begin{itemize}
+\item $LPC\_SC->PCONP |=1<<1$
+\end{itemize}
+\item Clock-Teiler einstellen
+\begin{itemize}
+\item $LPC\_SC->PCLKSEL0 |=3<<2$
+\end{itemize}
+\item Matchregister einstellen
+\begin{itemize}
+\item $cpu takt = 100mhz$
+\item $100mhz / 8 = 12,5$
+\item $MR = 12,5Mhz/2*1hz$
+\item $MR = 6250000$
+\item $LPC\_TIM0->MR0 = 6250000$
+\end{itemize}
+\item Einstellen was das Matchregister tun soll
+\begin{itemize}
+\item item Interrupt soll ausgelöst werden
+\item $LPC\_TIM0->MCR |= 3<<0$
+\end{itemize}
+\end{itemize}
+\item Interrupt Service Routine Schreiben
+\begin{itemize}
+\item z.B. void $TIMER0\_IRQHandler()$
+\item name ist vorgegeben und muss zwingend verwendet werden
+\item $system\_LPC17xx.s$ definiert die Namen der ISR-Funktionen (External Interrupts)
+\begin{itemize}
+\item enthält die IVT (Interrupt Vektor Table)
+\item Timer 0 meldet IMMER an Port 17
+\item Ist über $system\_LPC17xx.s$ nachvollziehbar
+\end{itemize}
+\item !!!Interrupt Flags zurücksetzen!!!
+\begin{itemize}
+\item sonst bleibt der Interrupt bestehen und man würde nie die ISR verlassen
+\item $LPC\_TIM0->IR |=1<<0$
+\begin{itemize}
+\item Setzen um zu resetten	
+\item Interrupt Register um Bit-Positionen zu finden
+\end{itemize}
+\end{itemize}
+\item Nutzfunktion implementieren
+\end{itemize}
+\item Interrupt Service Routine Priorität setzen
+\begin{itemize}
+\item $NVIC\_SetPriority(TIMER0\_IRQn,15)$
+\end{itemize}	
+\item Interrupt Service Routine aktivieren (sonst würde nie die Funktion abgefeuert werden)
+\begin{itemize}
+\item $NVIC\_EnableIRQ(TIMER0\_IRQn)$
+\end{itemize}
+\item Timer aktivieren
+\begin{itemize}
+\item$ LPC\_TIM0->TCR |=1<<0$
+\end{itemize}
+\end{enumerate}
+\subsection{CODE}
+
+\end{document}
