@@ -1,0 +1,45 @@
+0)	-> Timer einrichten (Interrupt Service Routine einrichten, Frequenz einstellen etc. -> Praktikum 4)
+1)	-> AD Wert abholen vom Potenziometer (PO23) (Datenblatt Seite 574)
+		-> GENAUE INFOS IN DEN KOMMENTAREN DES BEISPIELCODES
+		
+		1.1 Vorbereitung
+		
+		-> ADC einschalten
+			-> LPC_SC->PCONP |= 1<<12;
+		
+		-> Peripheral Clock für ADC einstellen
+			-> Man kann mit den Grundeinstellungen arbeiten
+			
+		-> Pin als ADC-Eingang aktivieren
+			-> LPC_PINCON->PINSEL1 |=1<<14;
+			
+		-> ADC-Kanal auswählen (Datenblatt Seite 577)
+			-> LPC_ADC->ADCR |=1<<0;
+			
+		-> Takt des AD-Wandlers wählen
+			-> LPC_ADC->ADCR |=124<<8;
+		
+		-> Repeat Modus oder Einzelwandlung? (Datenblatt Seite 577)
+			-> LPC_ADC->ADCR |= 1<<24;
+		
+		-> Betriebsbereitschaft EIN (POWER-DOWN auf 1 stellen)
+			-> LPC_ADC->ADCR |= 1<<21;
+		
+		1.2 Wert abholen
+		-> Wandlung starten
+			-> LPC_ADC->ADCR = LPC_ADC->ADCR | (1<<24;
+		
+		-> Warten bis Wandlung fertig ist (31. Bit muss 1 sein)
+			-> if(LPC_ADC->ADDR0 & (1<<31)) 
+			
+		-> Wert abholen
+			->!!!Achtung!!! Wert steht in einem 32 Bit Register mitten drin
+			  (Werte von 4-15), alles außenrum muss abgeschnitten werden
+			-> LPC_ADC->ADDR0>>4 & 0xfff // Adresse um 4 Bits shiften, schneidet unteren 4 Bits ab
+										 // & 0xfff schneidet obere überflüssigen Bits ab
+			->
+########## AUF DISPLAY AUSGEBEN ############
+
+
+
+
